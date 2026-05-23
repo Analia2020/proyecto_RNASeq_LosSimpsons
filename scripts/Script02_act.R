@@ -65,3 +65,49 @@ cat("  Mínimo:  ", min(transcritos_por_gen), "\n")
 cat("  Máximo:  ", max(transcritos_por_gen), "\n")
 cat("  Mediana: ", median(transcritos_por_gen), "\n")
 cat("  Media:   ", round(mean(transcritos_por_gen), 1), "\n")
+
+
+# --- BLOQUE 3: Revisar la carpeta Genes ---
+
+# Ruta a la carpeta principal donde están las carpetas de cada gen
+carpetas_genes_dir <- "00_data/referencia/Genes"
+
+# Verificación: la carpeta debe existir
+if (!dir.exists(carpetas_genes_dir)) {
+  stop("No se encuentra la carpeta: ", carpetas_genes_dir,
+       "\nRevisa la ruta.")
+}
+
+# Listar todas las subcarpetas
+carpetas_existentes <- list.dirs(
+  carpetas_genes_dir,
+  recursive  = FALSE,
+  full.names = FALSE
+)
+
+cat("Subcarpetas encontradas:", length(carpetas_existentes), "\n\n")
+print(carpetas_existentes)
+
+
+genes_en_carpetas <- sub("_datasets$", "", carpetas_existentes)
+
+# Comparación con la lista de genes del TSV
+cat("\n--- Comparación ---\n")
+cat("Genes en TSV:        ", length(genes_unicos), "\n")
+cat("Carpetas encontradas:", length(genes_en_carpetas), "\n")
+
+# Genes del TSV que NO tienen carpeta 
+faltantes_carpeta <- setdiff(genes_unicos, genes_en_carpetas)
+if (length(faltantes_carpeta) > 0) {
+  cat("\n⚠ Genes SIN carpeta:\n")
+  print(faltantes_carpeta)
+} else {
+  cat("\n✔ Todos los genes del TSV tienen su carpeta.\n")
+}
+
+# Carpetas que NO están en el TSV 
+sobrantes_carpeta <- setdiff(genes_en_carpetas, genes_unicos)
+if (length(sobrantes_carpeta) > 0) {
+  cat("\n⚠ Carpetas que NO aparecen en el TSV:\n")
+  print(sobrantes_carpeta)
+}
