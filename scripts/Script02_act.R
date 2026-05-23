@@ -111,3 +111,58 @@ if (length(sobrantes_carpeta) > 0) {
   cat("\n⚠ Carpetas que NO aparecen en el TSV:\n")
   print(sobrantes_carpeta)
 }
+
+
+# --- BLOQUE 4: Combinar todos los rna.fna en un solo archivo ---
+
+# Vamos a usar Biostrings para leer y escribir FASTA correctamente
+library(Biostrings)
+
+# Carpeta de salida (debe existir; la creé arriba si no)
+dir.create("02_alineamiento", showWarnings = FALSE)
+
+# Ruta del archivo combinado de salida
+output_fasta <- "02_alineamiento/referencia_combinada.fa"
+
+# Listamos las rutas completas a todos los rna.fna
+# (uno por cada carpeta de gen)
+rna_fna_paths <- file.path(
+  carpetas_genes_dir,
+  carpetas_existentes,
+  "rna.fna"
+)
+
+# Verificamos que todos existen antes de empezar
+existen <- file.exists(rna_fna_paths)
+if (!all(existen)) {
+  cat("⚠ rna.fna faltantes en:\n")
+  print(rna_fna_paths[!existen])
+  stop("Hay archivos rna.fna que no se encuentran. Revisa antes de seguir.")
+}
+cat("✔ Los 37 archivos rna.fna existen.\n\n")
+
+# Leemos las secuencias de cada archivo y las acumulamos
+# DNAStringSet es el tipo de dato de Biostrings para secuencias de ADN.
+todas_secuencias <- DNAStringSet()  # contenedor vacío
+
+for (i in seq_along(rna_fna_paths)) {
+  ruta <- rna_fna_paths[i]
+  gen  <- carpetas_existentes[i]
+  
+  # Leer el FASTA de ese gen
+  secs <- readDNAStringSet(ruta)
+  
+  # Concatenar al contenedor general
+  todas_secuencias <- c(todas_secuencias, secs)
+  
+  cat(sprintf("  [%2d/%d] %-25s → %3d transcritos\n",
+              i, length(rna_fna_paths), gen, length(secs)))
+}
+
+cat("\nTotal de transcritos combinados:", length(todas_secuencias), "\n")
+
+# Guardar todo en un único archivo FASTA
+writeXStringSet(todas_secuencias, filepath = output_fasta)
+
+cat("✔ Referencia combinada guardada en:", output_fasta, "\n")
+cat("  Tamaño:", round(file.info(output_fasta)$size / (1024^2), 2), "MB\n")
