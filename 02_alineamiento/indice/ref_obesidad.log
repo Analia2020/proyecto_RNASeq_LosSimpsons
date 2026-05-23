@@ -1,0 +1,1 @@
+A format issue is found in the 1-th line in file 'C:\Users\ANALIAA\OneDrive\Escritorio\proyecto_RNA_seq_Los_Simpsons\proyecto_RNASeq_LosSimpsons\02_alineamiento\referencia_combinada.fa': This line ends with '\r\n'. It is not a problem for building the index but we suggest to use Unix-styled line breaks..
