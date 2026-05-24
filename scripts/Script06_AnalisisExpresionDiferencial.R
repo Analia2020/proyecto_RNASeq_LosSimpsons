@@ -11,7 +11,7 @@
 #
 # Criterio:   1.4 - Análisis de expresión diferencial (15%)
 # =====================================================================
-BiocManager::install("DESeq2")
+#BiocManager::install("DESeq2")
 library(DESeq2)
 
 # --- 1. Cargar la matriz de cuentas ---
@@ -125,3 +125,25 @@ res_df <- res_df[, c("gene", "baseMean", "log2FoldChange",
                      "lfcSE", "stat", "pvalue", "padj")]
 res_df <- res_df[order(res_df$padj), ]
 print(res_df)
+
+
+# Regenerar res_df y degs desde dds y res que sí están en memoria
+res_df <- as.data.frame(res)
+res_df$gene <- rownames(res_df)
+res_df <- res_df[, c("gene", "baseMean", "log2FoldChange",
+                     "lfcSE", "stat", "pvalue", "padj")]
+res_df <- res_df[order(res_df$padj), ]
+
+degs <- res_df[!is.na(res_df$padj) &
+                 res_df$padj < 0.05 &
+                 abs(res_df$log2FoldChange) > 1, ]
+
+cat("DEGs encontrados:", nrow(degs), "\n")
+
+# --- 10. Guardar los resultados ---
+write.csv(res_df, "03_resultados/deseq2_resultados.csv", row.names = FALSE)
+write.csv(degs, "03_resultados/deseq2_DEGs.csv", row.names = FALSE)
+saveRDS(dds, "03_resultados/dds_object.rds")
+saveRDS(res, "03_resultados/res_object.rds")
+
+cat("\n✔ Resultados guardados en 03_resultados/\n")
